@@ -1,0 +1,39 @@
+services:
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD
+      MYSQL_DATABASE: $DB_NAME
+      MYSQL_USER: $DB_USER
+      MYSQL_PASSWORD: $DB_PWD
+    ports:
+    - "3306:3306"
+    restart: always
+    volumes:
+    - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+    - "8081:80"
+    environment:
+      PMA_ARBITRARY: 1
+  my-java-app:
+    image: nguyenmanhtrinh/demo-app:docker-exercise
+    environment:
+      DB_USER: $DB_USER
+      DB_NAME: $DB_NAME
+      DB_PWD: $DB_PWD
+      DB_SERVER: mysql
+    ports:
+    - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+volumes:
+  db-data:
